@@ -144,27 +144,24 @@ def detect(x_parts, y_parts, im_crop):
             # original_patch = cv2.imread("D:\Adeel\cnn_digits\Data\\0black\\1539929114.1331685.jpg")
             original_color_patch = im_crop[y_parts[i]:y_parts[i + 1], x_parts[j]:x_parts[j + 1]]
             original_patch = cv2.resize(original_color_patch, (28, 28), interpolation=cv2.INTER_LANCZOS4)
-
+            # patch = cv2.dilate(original_patch, kernel, iterations=2)
             patch_orig = cv2.dilate(original_patch, kernel, iterations=2)
             patch = cv2.cvtColor(patch_orig, cv2.COLOR_BGR2RGB)
             color_patch = np.expand_dims(patch, axis=0)
+            # color_patch = np.expand_dims(color_patch, axis=4)
             color_patch = np.divide(color_patch, 255)
             color_patch = color_patch.astype(np.float32)
-
-            digit_pred = model.predict(color_patch)
-
+            digit_pred, color_pred = model.predict(color_patch)
             digit_arg_max = np.argmax(digit_pred[0])
-            #color_arg_max = np.argmax(color_pred[0])
-
+            color_arg_max = np.argmax(color_pred[0])
             digit_prob = digit_pred[0][digit_arg_max] * 100
-            #color_prob = color_pred[0][color_arg_max] * 100
-
+            color_prob = color_pred[0][color_arg_max] * 100
             digit_code = digits_codes[digit_arg_max]
-            #color_code = colors_codes[color_arg_max]
+            color_code = colors_codes[color_arg_max]
             show("Patch", patch)
             # print(digit_pred[0] * 100)
             # print(digit_code)
-            if digit_code is not "nodigit" and digit_prob >= 99.99:
+            if digit_code is not "nodigit" and color_code is not "nocolor" and digit_prob >= 99.99:
                 # print(digit_prob)
                 # print("Original Detected", digit_code)
                 """
@@ -180,7 +177,7 @@ def detect(x_parts, y_parts, im_crop):
                         digit_code = digit
                 """
                 digits.append(digit_code)
-                #colors.append(color_code)
+                colors.append(color_code)
             else:
                 digits = []
                 colors = []
